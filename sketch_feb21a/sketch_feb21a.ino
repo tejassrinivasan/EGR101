@@ -24,9 +24,9 @@ const char* password = "";
 #define smtpServerPort        465
 #define emailSubject          "ESP32 Test"
 
-const int suppliesButton = 27;
+const int suppliesButton = 13;
 const int suppliesLED = 23;
-const int tempButton = 12;
+const int tempButton = 26;
 const int tempLED = 5;
 
 // The Email Sending data object contains config and data to send
@@ -34,6 +34,8 @@ SMTPData smtpData;
 
 // Callback function to get the Email sending status
 void sendCallback(SendStatus info);
+
+void sendEmail(int button, int LED, int msg);
 
 void setup() {
   pinMode(suppliesButton, INPUT_PULLUP);
@@ -59,85 +61,60 @@ void setup() {
 }
 
 void loop() {
-  if (digitalRead(suppliesButton) == true) {
-    
-    Serial.println("Preparing to send email");
-    Serial.println();
 
-    // Set the SMTP Server Email host, port, account and password
-    smtpData.setLogin(smtpServer, smtpServerPort, emailSenderAccount, emailSenderPassword);
+  if (digitalRead(suppliesButton) == false) {
+    sendEmail(suppliesLED, 0);
+  }
+  else if (digitalRead(tempButton) == false) {
+    sendEmail(tempLED, 1);
+  }
+}
 
-    // For library version 1.2.0 and later which STARTTLS protocol was supported,the STARTTLS will be
-    // enabled automatically when port 587 was used, or enable it manually using setSTARTTLS function.
-    //smtpData.setSTARTTLS(true);
+void sendEmail(int LED, int msg) {
+  Serial.println("Preparing to send email");
+  Serial.println();
 
-    // Set the sender name and Email
-    smtpData.setSender("ESP32", emailSenderAccount);
+  // Set the SMTP Server Email host, port, account and password
+  smtpData.setLogin(smtpServer, smtpServerPort, emailSenderAccount, emailSenderPassword);
 
-    // Set Email priority or importance High, Normal, Low or 1 to 5 (1 is highest)
-    smtpData.setPriority("High");
+  // For library version 1.2.0 and later which STARTTLS protocol was supported,the STARTTLS will be
+  // enabled automatically when port 587 was used, or enable it manually using setSTARTTLS function.
+  //smtpData.setSTARTTLS(true);
 
-    // Set the subject
-    smtpData.setSubject(emailSubject);
+  // Set the sender name and Email
+  smtpData.setSender("ESP32", emailSenderAccount);
 
-    // Set the message with HTML format
+  // Set Email priority or importance High, Normal, Low or 1 to 5 (1 is highest)
+  smtpData.setPriority("High");
+
+  // Set the subject
+  smtpData.setSubject(emailSubject);
+
+  // Set the message with HTML format
+  if (msg == 0) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Supplies Request</h1><p>- WE NEED MARKERS (sent from the POD)</p></div>", true);
     // Set the email message in text format (raw)
     //smtpData.setMessage("WE NEED MARKERS! -sent from the POD", false);
-
-    // Add recipients, you can add more than one recipient
-    smtpData.addRecipient(emailRecipient);
-    //smtpData.addRecipient("YOUR_OTHER_RECIPIENT_EMAIL_ADDRESS@EXAMPLE.com");
-
-    smtpData.setSendCallback(sendCallback);
-
-    //Start sending Email, can be set callback function to track the status
-    if (!MailClient.sendMail(smtpData))
-      Serial.println("Error sending Email, " + MailClient.smtpErrorReason());
-
-    //Clear all data from Email object to free memory
-    smtpData.empty();
-    digitalWrite(23, HIGH);
-    }   
-  else if (digitalRead(tempButton) == true) {
-    Serial.println("Preparing to send email");
-    Serial.println();
-
-    // Set the SMTP Server Email host, port, account and password
-    smtpData.setLogin(smtpServer, smtpServerPort, emailSenderAccount, emailSenderPassword);
-
-    // For library version 1.2.0 and later which STARTTLS protocol was supported,the STARTTLS will be
-    // enabled automatically when port 587 was used, or enable it manually using setSTARTTLS function.
-    //smtpData.setSTARTTLS(true);
-
-    // Set the sender name and Email
-    smtpData.setSender("ESP32", emailSenderAccount);
-
-    // Set Email priority or importance High, Normal, Low or 1 to 5 (1 is highest)
-    smtpData.setPriority("High");
-
-    // Set the subject
-    smtpData.setSubject(emailSubject);
-
-    // Set the message with HTML format
-    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- IT IS SO HOT (sent from the POD)</p></div>", true);
+  }
+  if (msg == 1) {
+    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- ITS HOT IN HERE (sent from the POD)</p></div>", true);
     // Set the email message in text format (raw)
     //smtpData.setMessage("WE NEED MARKERS! -sent from the POD", false);
+  }
 
-    // Add recipients, you can add more than one recipient
-    smtpData.addRecipient(emailRecipient);
-    //smtpData.addRecipient("YOUR_OTHER_RECIPIENT_EMAIL_ADDRESS@EXAMPLE.com");
+  // Add recipients, you can add more than one recipient
+  smtpData.addRecipient(emailRecipient);
+  //smtpData.addRecipient("YOUR_OTHER_RECIPIENT_EMAIL_ADDRESS@EXAMPLE.com");
 
-    smtpData.setSendCallback(sendCallback);
+  smtpData.setSendCallback(sendCallback);
 
-    //Start sending Email, can be set callback function to track the status
-    if (!MailClient.sendMail(smtpData))
-      Serial.println("Error sending Email, " + MailClient.smtpErrorReason());
+  //Start sending Email, can be set callback function to track the status
+  if (!MailClient.sendMail(smtpData))
+    Serial.println("Error sending Email, " + MailClient.smtpErrorReason());
 
-    //Clear all data from Email object to free memory
-    smtpData.empty();
-    digitalWrite(5, HIGH);
-   }
+  //Clear all data from Email object to free memory
+  smtpData.empty();
+  digitalWrite(LED, HIGH);
 }
 
 // Callback function to get the Email sending status
