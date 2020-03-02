@@ -8,8 +8,11 @@
   The above copyright notice and this permission notice shall be included in all
   copies or substantial portions of the Software.
 */
-
+  
+ 
 #include "ESP32_MailClient.h"
+#include <WiFi.h>
+#include "time.h"
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "DukeVisitor";
@@ -29,6 +32,11 @@ const int suppliesLED = 23;
 const int tempButton = 26;
 const int tempLED = 5;
 
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = -18000;
+const int   daylightOffset_sec = 3600;
+
+
 // The Email Sending data object contains config and data to send
 SMTPData smtpData;
 
@@ -36,6 +44,16 @@ SMTPData smtpData;
 void sendCallback(SendStatus info);
 
 void sendEmail(int button, int LED, int msg);
+
+void printLocalTime()
+{
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
 
 void setup() {
   pinMode(suppliesButton, INPUT_PULLUP);
@@ -58,10 +76,16 @@ void setup() {
   Serial.println();
   Serial.println("WiFi connected.");
   Serial.println();
+
+  //init and get the time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  printLocalTime();
 }
 
 void loop() {
-
+  delay(1000);
+  printLocalTime();
+  
   if (digitalRead(suppliesButton) == false) {
     sendEmail(suppliesLED, 0);
   }
