@@ -24,7 +24,7 @@ const char* password = "";
 #define smtpServerPort        465
 #define emailSubject          "ESP32 Test"
 
-const int suppliesButton = 13;
+const int suppliesButton = 4;
 const int tempHotButton = 26;
 const int tempColdButton = 32;
 const int LED = 5;
@@ -79,7 +79,7 @@ void loop() {
   getLocalTime(&timeinfo);
   if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
     HTTPClient http;
-    http.begin("http://127.0.0.1:8000/");  //Specify destination for HTTP request
+    http.begin("http://127.0.0.1:8000/tickets");  //Specify destination for HTTP request
     http.addHeader("Content-Type", "application/json");
 
     if (digitalRead(suppliesButton) == false && !disabled0) {
@@ -127,7 +127,6 @@ void loop() {
 
   void createPOST(int msg) {
     if (msg == 0) {
-      String httpRequestData = "api_key=tPmAT5Ab3j7F9&room=Supplies&request=Hudson 110&time=printLocalTime()&status=Complete";
       int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"room\":\"Hudson 110\",\"request\":\"24.25\",\"time\":\"49.54\",\"status\":\"1005.14\"}");
     }
     if (httpResponseCode > 0) {
