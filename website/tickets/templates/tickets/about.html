@@ -1,0 +1,75 @@
+{% extends "tickets/layouts/base.html" %}
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+
+{% block content %}
+
+<h1>Meet our EGR101 team!</h1>
+<body class="about">
+	<div class="row">
+		<div class="column">
+			<div class="card">
+				<img src="{% static 'images/Tejas.jpg' %}" alt="" height = auto  style="width:100%" >
+				<div class="container">
+					<h2>Tejas Srinivasan</h2>
+					<p class="title">Software Lead</p>
+					<p>Short bio.</p>
+					<p>tejas.srinivasan@duke.edu</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="column">
+			<div class="card">
+				<img src="{% static 'images/Asher.jpg' %}" alt="" height = auto style="width:100%">
+				<div class="container">
+					<h2>Asher Early</h2>
+					<p class="title">Software Lead</p>
+					<p>Short bio.</p>
+					<p>asher.early@duke.edu</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="column">
+			<div class="card">
+				<img src="{% static 'images/Tejas.jpg' %}" alt="" height = 250 width = 50 style="width:100%">
+				<div class="container">
+					<h2>David Levin</h2>
+					<p class="title">Software Lead</p>
+					<p>Short bio.</p>
+					<p>tejasx001@gmail.com</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="column2">
+			<div class="card">
+				<img src="{% static 'images/Tejas.jpg' %}" alt="" height=250 width = 50 style="width:100%">
+				<div class="container">
+					<h2>Ian Flynn</h2>
+					<p class="title">Software Lead</p>
+					<p>Short bio.</p>
+					<p>tejasx001@gmail.com</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="column2">
+			<div class="card">
+				<img src="{% static 'images/Tejas.jpg' %}" alt="" height = 250 width = 50 style="width:100%">
+				<div class="container">
+					<h2>Dylan Paul</h2>
+					<p class="title">Software Lead</p>
+					<p>Short bio.</p>
+					<p>tejasx001@gmail.com</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+{% endblock %}

@@ -1,0 +1,76 @@
+a.navbar-brand {
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 30px;
+}
+
+ h1 {
+ 	margin: 0;
+    padding: 0;
+    font-family: "proxima-nova-soft", "Proxima Nova Soft", Helvetica, Arial, sans-serif;
+    line-height: 1.618;
+    letter-spacing: 0.0375em;
+    text-align: center;
+  	font-weight: bold
+}
+
+ 
+.column {
+  float: left;
+  width: 26%;
+  margin-bottom: 16px;
+  margin-left: 130px;
+  margin-right: -115px;
+  padding: 0 8px;
+}
+
+/* Display the columns below each other instead of side by side on small screens */
+@media screen and (max-width: 650px){
+  .column {
+    width: 50%;
+    display: inline-block;
+  }
+}
+
+/* Add some shadows to create a card effect */
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Some left and right padding inside the container */
+.container {
+  padding: 0 16px;
+}
+
+.container h2 {
+	font-size: 30px;
+}
+
+/* Clear floats */
+.container::after, .row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.title {
+  color: grey;
+}
+
+.column2{
+  float: left;
+  width: 26%;
+  margin-bottom: 16px;
+  margin-left: 310px;
+  margin-right: -295px;
+  padding: 0 8px;
+}
+
+@media screen and (max-width: 650px) {
+  .column2 {
+    width: 50%;
+    display: inline-block;
+  }
+
+}
+
