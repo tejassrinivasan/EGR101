@@ -12,6 +12,7 @@
 #include "ESP32_MailClient.h"
 #include <WiFi.h>
 #include "time.h"
+#include <HTTPClient.h>
 
 const char* ssid = "DukeVisitor";
 const char* password = "";
@@ -24,10 +25,10 @@ const char* password = "";
 #define emailSubject          "ESP32 Test"
 
 const int suppliesButton = 13;
-const int suppliesLED = 23;
 const int tempHotButton = 26;
 const int tempColdButton = 32;
-const int tempLED = 5;
+const int LED = 5;
+long timePushed;
 bool disabled0;
 bool disabled1;
 
@@ -39,20 +40,22 @@ SMTPData smtpData;
 
 void sendCallback(SendStatus info);
 
-void sendEmail(int button, int LED, int msg);
+void sendEmail(int LED, int msg);
+
+void createPOST(int msg);
 
 void setup() {
   pinMode(suppliesButton, INPUT_PULLUP);
   pinMode(tempHotButton, INPUT_PULLUP);
   pinMode(tempColdButton, INPUT_PULLUP);
-  pinMode(suppliesLED, OUTPUT);
-  pinMode(tempLED, OUTPUT);
-  digitalWrite(23, LOW);
+  pinMode(LED, OUTPUT);
   digitalWrite(5, LOW);
   disabled0 = false;
   disabled1 = false;
   Serial.begin(115200);
-  
+
+  delay(4000);
+
   Serial.println();
   Serial.print("Connecting");
 
@@ -74,109 +77,133 @@ void setup() {
 void loop() {
   struct tm timeinfo;
   getLocalTime(&timeinfo);
-  long timePushed;
+  if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
+    HTTPClient http;
+    http.begin("http://127.0.0.1:8000/");  //Specify destination for HTTP request
+    http.addHeader("Content-Type", "application/json");
 
-  if (digitalRead(suppliesButton) == false && !disabled0) {
-    //if it is not disabled send email and disable
-    sendEmail(suppliesLED, 0);
-    disabled0 = true;
-    printLocalTime();
+    if (digitalRead(suppliesButton) == false && !disabled0) {
+      //if it is not disabled send email and disable
+      sendEmail(LED, 0);
+      createPOST(0);
+      disabled0 = true;
+      printLocalTime();
+    }
+
+    //if it is 6 oclock and disabled enable it
+    if ((timeinfo.tm_hour == 06) && disabled0) {
+      disabled0 = false;
+      printLocalTime();
+    }
+
+    if (digitalRead(tempHotButton) == false) {
+      checkenable();
+      if (!disabled1) {
+        sendEmail(LED, 1);
+        disabled1 = true;
+        timePushed = millis();
+        printLocalTime();
+      }
+    }
+
+    if (digitalRead(tempColdButton) == false) {
+      checkenable();
+      if (!disabled1) {
+        sendEmail(LED, 2);
+        disabled1 = true;
+        timePushed = millis();
+        printLocalTime();
+      }
+    }
   }
 
-  //if it is 6 oclock and disabled enable it
-  if ((timeinfo.tm_hour == 06) && disabled0) {
-    disabled0 = false;
-    printLocalTime();
-  }
-
-  if (digitalRead(tempHotButton) == false) {
-    checkenable();
-    if (!disabled1) {
-      sendEmail(tempLED, 1);
-      disabled1 = true;
-      timePushed = millis();
+  void checkenable() {
+    //if 30 min pass and disabled, enable it
+    if (((millis() > timePushed + 1800000) || millis() < timePushed) && disabled1) {
+      disabled1 = false;
       printLocalTime();
     }
   }
 
-  if (digitalRead(tempColdButton) == false) {
-    checkenable();
-    if (!disabled1) {
-      sendEmail(tempLED, 2);
-      disabled1 = true;
-      timePushed = millis();
-      printLocalTime();
+  void createPOST(int msg) {
+    if (msg == 0) {
+      String httpRequestData = "api_key=tPmAT5Ab3j7F9&room=Supplies&request=Hudson 110&time=printLocalTime()&status=Complete";
+      int httpResponseCode = http.POST("{\"api_key\":\"tPmAT5Ab3j7F9\",\"room\":\"Hudson 110\",\"request\":\"24.25\",\"time\":\"49.54\",\"status\":\"1005.14\"}");
+    }
+    if (httpResponseCode > 0) {
+      Serial.println(httpResponseCode);   //Print return code
+      Serial.println(response);           //Print request answer
+
+    } else {
+
+      Serial.print("Error on sending POST: ");
+      Serial.println(httpResponseCode);
+
+    }
+    http.end();  //Free resources
+    delay(10000);  //Send a request every 10 seconds
+  }
+  void sendEmail(int LED, int msg) {
+    digitalWrite(LED, HIGH);
+    Serial.println("Preparing to send email");
+    Serial.println();
+
+    // Set the SMTP Server Email host, port, account and password
+    smtpData.setLogin(smtpServer, smtpServerPort, emailSenderAccount, emailSenderPassword);
+
+    // Set the sender name and Email
+    smtpData.setSender("ESP32", emailSenderAccount);
+
+    // Set Email priority or importance High, Normal, Low or 1 to 5 (1 is highest)
+    smtpData.setPriority("High");
+
+    // Set the subject
+    smtpData.setSubject(emailSubject);
+
+    // Set the message with HTML format
+    if (msg == 0) {
+      smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Supplies Request</h1><p>- WE NEED MARKERS (sent from the POD)</p></div>", true);
+    }
+    if (msg == 1) {
+      smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- ITS HOT IN HERE (sent from the POD)</p></div>", true);
+    }
+
+    if (msg == 2) {
+      smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- ITS COLD IN HERE (sent from the POD)</p></div>", true);
+    }
+
+    // Add recipients, you can add more than one recipient
+    smtpData.addRecipient(emailRecipient);
+
+    smtpData.setSendCallback(sendCallback);
+
+    //Start sending Email, can be set callback function to track the status
+    if (!MailClient.sendMail(smtpData))
+      Serial.println("Error sending Email, " + MailClient.smtpErrorReason());
+
+    //Clear all data from Email object to free memory
+    smtpData.empty();
+    delay(1500);
+    digitalWrite(LED, LOW);
+  }
+
+  void printLocalTime()
+  {
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+      Serial.println("Failed to obtain time");
+      return;
+    }
+    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+  }
+
+  // Callback function to get the Email sending status
+  void sendCallback(SendStatus msg) {
+    // Print the current status
+    Serial.println(msg.info());
+
+    // Do something when complete
+    if (msg.success()) {
+      Serial.println("----------------");
     }
   }
-}
-
-void checkenable() {
-  //if 30 min pass and disabled, enable it
-  if (((millis() > timePushed + 1800000) || millis() < timePushed) && disabled1) {
-    disabled1 = false;
-    printLocalTime();
-  }
-}
-
-void sendEmail(int LED, int msg) {
-  Serial.println("Preparing to send email");
-  Serial.println();
-
-  // Set the SMTP Server Email host, port, account and password
-  smtpData.setLogin(smtpServer, smtpServerPort, emailSenderAccount, emailSenderPassword);
-
-  // Set the sender name and Email
-  smtpData.setSender("ESP32", emailSenderAccount);
-
-  // Set Email priority or importance High, Normal, Low or 1 to 5 (1 is highest)
-  smtpData.setPriority("High");
-
-  // Set the subject
-  smtpData.setSubject(emailSubject);
-
-  // Set the message with HTML format
-  if (msg == 0) {
-    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Supplies Request</h1><p>- WE NEED MARKERS (sent from the POD)</p></div>", true);
-  }
-  if (msg == 1) {
-    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- ITS HOT IN HERE (sent from the POD)</p></div>", true);
-  }
-
-  if (msg == 2) {
-    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- ITS COLD IN HERE (sent from the POD)</p></div>", true);
-  }
-
-  // Add recipients, you can add more than one recipient
-  smtpData.addRecipient(emailRecipient);
-
-  smtpData.setSendCallback(sendCallback);
-
-  //Start sending Email, can be set callback function to track the status
-  if (!MailClient.sendMail(smtpData))
-    Serial.println("Error sending Email, " + MailClient.smtpErrorReason());
-
-  //Clear all data from Email object to free memory
-  smtpData.empty();
-  digitalWrite(LED, HIGH);
-}
-
-void printLocalTime()
-{
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo)) {
-    Serial.println("Failed to obtain time");
-    return;
-  }
-  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
-}
-
-// Callback function to get the Email sending status
-void sendCallback(SendStatus msg) {
-  // Print the current status
-  Serial.println(msg.info());
-
-  // Do something when complete
-  if (msg.success()) {
-    Serial.println("----------------");
-  }
-}
