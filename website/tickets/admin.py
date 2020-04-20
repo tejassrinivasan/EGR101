@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import Ticket
 
 
-class InfoAdmin(admin.ModelAdmin):
+class TicketAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['room']}),
         (None,               {'fields': ['request']}),
@@ -14,4 +14,4 @@ class InfoAdmin(admin.ModelAdmin):
     list_filter = ['pub_date']
     search_fields = ['request']
 
-admin.site.register(Ticket, InfoAdmin)
+admin.site.register(Ticket, TicketAdmin)

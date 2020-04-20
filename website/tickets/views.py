@@ -24,7 +24,7 @@ def contact(request):
 def main_page(request):
     context = {"contact_page": "active"}
     if request.method=='GET':
-        New_Info = Info(room = request.GET['room'], request = request.GET['request'], status = request.GET['status']) 
-        New_Info.save()
+        newTicket = Ticket(room = request.GET['room'], request = request.GET['request'], status = request.GET['status']) 
+        newTicket.save()
     return render(request, 'tickets/contact.html', context)
 
