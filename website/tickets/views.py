@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import ListView
-from .models import Info
+from .models import Ticket
 from django_tables2 import SingleTableView
 from .tables import RequestsTable
 import json
 from django.http import StreamingHttpResponse
 
 class IndexListView(SingleTableView):
-    model = Info
+    model = Ticket
     table_class = RequestsTable
     template_name = 'tickets/index.html'
 

@@ -6,7 +6,7 @@ from django.utils.timezone import now
 
 # Create your models here.
 
-class Info(models.Model):
+class Ticket(models.Model):
     room = models.CharField(max_length=100, verbose_name="Room Number")
     request = models.CharField(max_length=100, verbose_name="Request Type", choices=[('Supplies - Whiteboard', 'Supplies - Whiteboard'), 
     	('Supplies - Blackboard', 'Supplies - Blackboard'), ('Temperature - Too Hot', 'Temperature - Too Hot'),

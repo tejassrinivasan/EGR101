@@ -1,10 +1,10 @@
 import django_tables2 as tables
-from .models import Info
+from .models import Ticket
 import itertools
 
 class RequestsTable(tables.Table):
 	class Meta:
-		model = Info
+		model = Ticket
 		template_name = "django_tables2/bootstrap.html"
 		fields = ("id", "room", "request", "pub_date", "status",)
 
