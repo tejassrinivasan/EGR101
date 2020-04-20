@@ -15,5 +15,3 @@ class Info(models.Model):
     status = models.CharField(max_length=100, verbose_name="Status", choices=[('Not Started', 'Not Started'), ('In Progress', 'In Progress'),
     	('Completed', 'Completed')])
 
-
-
