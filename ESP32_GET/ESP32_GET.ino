@@ -14,8 +14,10 @@ const char* password = "ewolram1";
 #define smtpServerPort        465
 #define emailSubject          "ESP32 Test"
 
-const int supWBBut = 4;
-//const int supBBBut = ?;
+const int supWBMarkersBut = ?;
+const int supWBErasersBut = ?;
+//const int supBBChalkBut = ?;
+//const int supBBErasersBut = ?;
 const int tHotBut = 26;
 const int tColdBut = 32;
 const int genBut = 13;
@@ -26,11 +28,13 @@ long timePushed;
 bool disabled0;
 bool disabled1;
 
-const int supWB = 0;
-const int supBB = 1;
-const int tHot = 2;
-const int tCold = 3;
-const int gen = 4;
+const int supWBMarkers = 0;
+const int supWBErasers = 1;
+const int supBBChalk = 2;
+const int supBBErasers = 3;
+const int tHot = 4;
+const int tCold = 5;
+const int gen = 6;
 
 String room = "Hudson 110";
 
@@ -51,8 +55,10 @@ void checkenable();
 String serverName = "http://192.168.2.57:8000/tickets/main";
 
 void setup() {
-  pinMode(supWBBut, INPUT_PULLUP);
-  //pinMode(supBBBut, INPUT_PULLUP);
+  pinMode(supWBMarkersBut, INPUT_PULLUP);
+  pinMode(supWBErasersBut, INPUT_PULLUP);
+  //pinMode(supBBMarkersBut, INPUT_PULLUP);
+  //pinMode(supBBErasersBut, INPUT_PULLUP);
   pinMode(tHotBut, INPUT_PULLUP);
   pinMode(tColdBut, INPUT_PULLUP);
   pinMode(genBut, INPUT_PULLUP);
@@ -90,16 +96,28 @@ void loop() {
       disabled0 = false;
     }
 
-    if (digitalRead(supWBBut) == false && !disabled0) {
-      emailandGET(LED, supWB);
+    if (digitalRead(supWBMarkersBut) == false && !disabled0) {
+      emailandGET(LED, supWBMarkers);
       disabled0 = true;
     }
 
-    /*    if (digitalRead(supBBBut) == false && !disabled0) {
-          emailandGET(LED, supBB);
+    if (digitalRead(supWBErasersBut) == false && !disabled0) {
+      emailandGET(LED, supWBErasers);
+      disabled0 = true;
+    }
+
+    /*    if (digitalRead(supBBMarkersBut) == false && !disabled0) {
+          emailandGET(LED, supBBMarkers);
           disabled0 = true;
         }
     */
+
+    /*    if (digitalRead(supBBErasersBut) == false && !disabled0) {
+          emailandGET(LED, supBBErasers);
+          disabled0 = true;
+        }
+    */
+
     if (digitalRead(tHotBut) == false) {
       checkenable();
       if (!disabled1) {
@@ -126,7 +144,7 @@ void emailandGET(int LED, int msg) {
   digitalWrite(LED, HIGH);
   Serial.println("Preparing to send email");
   Serial.println();
-  
+
   smtpData.setLogin(smtpServer, smtpServerPort, emailSenderAccount, emailSenderPassword);
   smtpData.setSender("ESP32", emailSenderAccount);
   smtpData.setPriority("High");
@@ -137,29 +155,41 @@ void emailandGET(int LED, int msg) {
   Serial.println("Posting JSON data to server...");
 
   if (msg == 0) {
-    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Whiteboard Supplies Request</h1><p>- We need supplies for whiteboard</p></div>", true);
+    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Whiteboard Supplies Request</h1><p>- We need markers for whiteboard</p></div>", true);
     serverpath = serverName + "?room=%s&request=Supplies - Whiteboard&status=Not Complete", room;
   }
 
   if (msg == 1) {
-    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Blackboard Supplies Request</h1><p>- We need supplies for blackboard</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Supplies - Blackboard&status=Not Complete", room;
+    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Whiteboard Supplies Request</h1><p>- We need erasers for whiteboard</p></div>", true);
+    serverpath = serverName + "?room=%s&request=Supplies - Whiteboard&status=Not Complete", room;
   }
 
   if (msg == 2) {
+    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Blackboard Supplies Request</h1><p>- We need chalk for blackboard</p></div>", true);
+    serverpath = serverName + "?room=%s&request=Supplies - Blackboard&status=Not Complete", room;
+  }
+
+  if (msg == 3) {
+    smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Blackboard Supplies Request</h1><p>- We need erasers for blackboard</p></div>", true);
+    serverpath = serverName + "?room=%s&request=Supplies - Blackboard&status=Not Complete", room;
+  }
+
+
+  if (msg == 4) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- It is too hot in here</p></div>", true);
     serverpath = serverName + "?room=%s&request=Temperature - Too Hot&status=Not Complete", room;
   }
 
-  if (msg == 3) {
+  if (msg == 5) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- It is too cold in here</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Temperature - Too Cold &status=Not_Complete", room;
+    serverpath = serverName + "?room=%s&request=Temperature - Too Cold &status=Not Complete", room;
   }
 
-  if (msg == 4) {
+  if (msg == 6) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>General Request</h1><p>- This is a general maintainance request</p></div>", true);
     serverpath = serverName + "?room=%s&request=General&status=Not Complete", room;
   }
+
 
   http.begin(serverpath.c_str());  //Specify destination for HTTP request
   http.addHeader("Content-Type", "application/json");
@@ -171,7 +201,7 @@ void emailandGET(int LED, int msg) {
     Serial.println(httpResponseCode);
     Serial.println(response);
   }
-  
+
   else {
     Serial.printf("Error occurred while sending HTTP GET: %s\n", http.errorToString(httpResponseCode).c_str());
   }
