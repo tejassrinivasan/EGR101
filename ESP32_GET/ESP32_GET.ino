@@ -14,10 +14,10 @@ const char* password = "ewolram1";
 #define smtpServerPort        465
 #define emailSubject          "ESP32 Test"
 
-const int supWBMarkersBut = ?;
-const int supWBErasersBut = ?;
-//const int supBBChalkBut = ?;
-//const int supBBErasersBut = ?;
+const int supWBMarkersBut = 4;
+const int supWBErasersBut = 8;
+const int supBBChalkBut = 2;
+const int supBBErasersBut = 6;
 const int tHotBut = 26;
 const int tColdBut = 32;
 const int genBut = 13;
@@ -36,7 +36,7 @@ const int tHot = 4;
 const int tCold = 5;
 const int gen = 6;
 
-String room = "Hudson 110";
+String room = "Hudson%20110";
 
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = -18000;
@@ -96,7 +96,7 @@ void loop() {
       disabled0 = false;
     }
 
-    if (digitalRead(supWBMarkersBut) == false && !disabled0) {
+    if (digitalRead(supWBMarkersBut) == false ){//&& !disabled0) {
       emailandGET(LED, supWBMarkers);
       disabled0 = true;
     }
@@ -156,38 +156,38 @@ void emailandGET(int LED, int msg) {
 
   if (msg == 0) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Whiteboard Supplies Request</h1><p>- We need markers for whiteboard</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Supplies - Whiteboard&status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=Supplies%20-%20Whiteboard&status=Not%20Complete";
   }
 
   if (msg == 1) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Whiteboard Supplies Request</h1><p>- We need erasers for whiteboard</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Supplies - Whiteboard&status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=Supplies%20-%20Whiteboard&status=Not%20Complete";
   }
 
   if (msg == 2) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Blackboard Supplies Request</h1><p>- We need chalk for blackboard</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Supplies - Blackboard&status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=Supplies%20-%20Blackboard&status=Not%20Complete";
   }
 
   if (msg == 3) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Blackboard Supplies Request</h1><p>- We need erasers for blackboard</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Supplies - Blackboard&status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=Supplies%20-%20Blackboard&status=Not%20Complete";
   }
 
 
   if (msg == 4) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- It is too hot in here</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Temperature - Too Hot&status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=Temperature%20-%20Too%20Hot&status=Not%20Complete";
   }
 
   if (msg == 5) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>Temperature Request</h1><p>- It is too cold in here</p></div>", true);
-    serverpath = serverName + "?room=%s&request=Temperature - Too Cold &status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=Temperature%20-%20Too%20Cold%20&status=Not%20Complete";
   }
 
   if (msg == 6) {
     smtpData.setMessage("<div style=\"color:#2f4468;\"><h1>General Request</h1><p>- This is a general maintainance request</p></div>", true);
-    serverpath = serverName + "?room=%s&request=General&status=Not Complete", room;
+    serverpath = serverName + "?room=" + room + "&request=General&status=Not%20Complete";
   }
 
 
