@@ -1,8 +1,0 @@
-Ticketing system website:    
-1. Table 
-	a. Ticket #
-	b. Type
-	c. Room #
-	d. Status
-	e. Time of Request
-	f. Who is handling request
